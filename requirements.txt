@@ -5,3 +5,4 @@ langchain_community
 faiss-cpu
 streamlit
 pypdf
+together

@@ -3,7 +3,7 @@ import os
 import requests
 import re
 import numpy as np
-import PyPDF2
+import pypdf
 import io
 
 from together import Together

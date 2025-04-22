@@ -19,7 +19,7 @@ class RAGEvaluator:
             2. The ground truth answer from authoritative sources
             3. The predicted answer from a RAG system
             
-            Your task is to evaluate if the predicted answer accurately captures the information in the ground truth answer.
+            Your task is to evaluate if the predicted answer is better than the ground turth and accurate.
             
             Question: {question}
             
@@ -28,10 +28,11 @@ class RAGEvaluator:
             Predicted Answer: {prediction}
             
             First, analyze both answers carefully.
-            Then determine if the predicted answer contains the same key information as the ground truth answer.
-            
+            Then determine if the predicted answer contains the same idea as the ground truth answer.
+            Prefer the Prediction Answer if it is accurate and better response than the ground truth.
+
             Finally, output ONLY a 1 or 0:
-            - Output 1 if the prediction accurately captures the essential information in the ground truth
+            - Output 1 if the prediction is better or it accurately captures the essential information in the ground truth
             - Output 0 if the prediction is inaccurate, contains incorrect information, or misses key details
             
             Your output should be ONLY the number 1 or 0, with no additional text."""
@@ -47,10 +48,14 @@ class RAGEvaluator:
         })
         
         try:
-            return int(result.strip())
+            xx = int(result[-1].strip())
+            print(xx)
+            return xx
         except ValueError:
             print(f"Warning: Unexpected evaluation result - {result}")
-            return 0
+            xx = 0
+            print(xx)
+            return xx 
     
     def evaluate_dataset(self, dataset: List[Dict[str, Any]], predictions: List[str]) -> Dict[str, Any]:
         """Evaluate entire dataset and generate metrics"""
@@ -86,24 +91,29 @@ def load_dataset(file_path: str) -> List[Dict[str, str]]:
     df = pd.read_csv(file_path)
     return df.to_dict('records')
 
+def get_rag_predictions(dataset: List[Dict[str, str]]) -> List[str]:
+    """
+    This function should be replaced with calls to your actual RAG system
+    It should return a list of predictions corresponding to each question in the dataset
+    """
+    
+    # predictions = []
+    # for item in dataset:
+    #     for q, a in item.items():
+    #         # get RAG pred for q
+    
+    import pandas as pd
+    fp = r"E:\COLLEGE\SEM 6\CIP\AyurRagBot\errors.csv"
+    df = pd.read_csv(fp)
+    return df["Prediction"].tolist()
+
 if __name__ == "__main__":
-    dataset = load_dataset("/home/sem6/Downloads/AyurRagBot-main/shortform_QA.csv")
-
-    def get_rag_predictions(dataset: List[Dict[str, str]]) -> List[str]:
-        """
-        This function should be replaced with calls to your actual RAG system
-        It should return a list of predictions corresponding to each question in the dataset
-        """
-        
-        predictions = []
-        for item in dataset:
-            for q, a in item.items():
-                # get RAG pred for q
-
-        return predictions
-    
+    dataset = load_dataset(r"E:\COLLEGE\SEM 6\CIP\AyurRagBot\errors.csv")
     predictions = get_rag_predictions(dataset)
-    
+
+    print(f"Loaded {len(dataset)} questions from dataset")
+    print(f"Generated {len(predictions)} predictions")
+
     evaluator = RAGEvaluator()
     evaluation_results = evaluator.evaluate_dataset(dataset, predictions)
     
@@ -111,5 +121,5 @@ if __name__ == "__main__":
     print(f"Accuracy: {evaluation_results['accuracy']:.2%}")
     print(f"Correct: {evaluation_results['total_correct']}/{evaluation_results['total_questions']}")
     
-    pd.DataFrame(evaluation_results['detailed_results']).to_csv("evaluation_results.csv", index=False)
+    pd.DataFrame(evaluation_results['detailed_results']).to_csv("error_results.csv", index=False)
     print("Detailed results saved to evaluation_results.csv")
